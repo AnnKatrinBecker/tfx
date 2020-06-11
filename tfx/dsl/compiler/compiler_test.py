@@ -25,7 +25,7 @@ import tensorflow as tf
 import tensorflow_model_analysis as tfma
 
 from google.protobuf import text_format
-from tfx.components import CsvExampleGen
+from tfx.components import BigQueryExampleGen
 from tfx.components import Evaluator
 from tfx.components import ExampleValidator
 from tfx.components import Pusher
@@ -45,7 +45,6 @@ from tfx.proto.orchestration import pipeline_pb2
 from tfx.types import Channel
 from tfx.types.standard_artifacts import Model
 from tfx.types.standard_artifacts import ModelBlessing
-from tfx.utils.dsl_utils import external_input
 
 
 class CompilerTest(tf.test.TestCase):
@@ -54,8 +53,6 @@ class CompilerTest(tf.test.TestCase):
     super(CompilerTest, self).setUp()
     self._set_up_test_pipeline()
     self._set_up_test_pipeline_pb()
-    # pylint: disable=g-bad-name
-    self.maxDiff = 80 * 1000  # Let's hear what assertEqual has to say.
 
   def _set_up_test_pipeline(self):
     """Builds an Iris example pipeline with slight changes."""
@@ -63,12 +60,11 @@ class CompilerTest(tf.test.TestCase):
     iris_root = "iris_root"
     serving_model_dir = os.path.join(iris_root, "serving_model", pipeline_name)
     tfx_root = "tfx_root"
-    data_path = os.path.join(tfx_root, "data_path")
     pipeline_root = os.path.join(tfx_root, "pipelines", pipeline_name)
     direct_num_workers = 0
     self.test_pipeline_info = data_types.PipelineInfo(pipeline_name, iris_root)
 
-    example_gen = CsvExampleGen(input=external_input(data_path))
+    example_gen = BigQueryExampleGen(query="big_query")
 
     statistics_gen = StatisticsGen(examples=example_gen.outputs["examples"])
 
@@ -156,7 +152,7 @@ class CompilerTest(tf.test.TestCase):
     """Test compiling the whole pipeline."""
     c = compiler.Compiler()
     compiled_pb = c.compile(self._pipeline)
-    self.assertProtoEquals(self._pipeline_pb, compiled_pb)
+    self.assertEqual(self._pipeline_pb, compiled_pb)
 
 
 if __name__ == "__main__":
