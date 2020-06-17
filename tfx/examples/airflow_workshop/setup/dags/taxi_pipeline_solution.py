@@ -174,8 +174,11 @@ def _create_pipeline(pipeline_name: Text, pipeline_root: Text, data_root: Text,
       enable_cache=True,
       metadata_connection_config=metadata.sqlite_metadata_connection_config(
           metadata_path),
-      # TODO(b/142684737): The multi-processing API might change.
-      beam_pipeline_args=['--direct_num_workers=%d' % direct_num_workers])
+      beam_pipeline_args=[
+          '--direct_running_mode=%s' %
+          ('in_memory' if direct_num_workers == 1 else 'multi_processing'),
+          '--direct_num_workers=%d' % direct_num_workers,
+      ])
 
 
 # 'DAG' below need to be kept for Airflow to detect dag.

@@ -26,9 +26,12 @@ tfx_pipeline = pipeline.Pipeline(
     # this to `--direct_num_workers=0` to run one worker per available CPU
     # thread or `--direct_num_workers=$N`, where `$N` is a fixed number of
     # worker processes.
-    #
-    # TODO(b/142684737): The Beam multi-processing API might change.
-    beam_pipeline_args = ['--direct_num_workers=1'],
+    direct_num_workers = 1
+    beam_pipeline_args=[
+        '--direct_running_mode=%s' %
+        ('in_memory' if direct_num_workers == 1 else 'multi_processing'),
+        '--direct_num_workers=%d' % direct_num_workers,
+    ],
 
     additional_pipeline_args={})
 

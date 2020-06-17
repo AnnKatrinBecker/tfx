@@ -182,9 +182,11 @@ def _create_parameterized_pipeline(
           trainer, model_resolver, evaluator, pusher
       ],
       enable_cache=enable_cache,
-      # TODO(b/142684737): The multi-processing API might change.
-      beam_pipeline_args=['--direct_num_workers=%d' % direct_num_workers],
-  )
+      beam_pipeline_args=[
+          '--direct_running_mode=%s' %
+          ('in_memory' if direct_num_workers == 1 else 'multi_processing'),
+          '--direct_num_workers=%d' % direct_num_workers,
+      ])
 
 
 if __name__ == '__main__':
